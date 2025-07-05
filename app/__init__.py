@@ -5,7 +5,7 @@ from app.webhook.routes import webhook
 def create_app():
     app = Flask(__name__)
 
-    # Database configuration (using SQLite for demo)
+    # Database configuration (using SQLite for demo) 
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///webhook.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 

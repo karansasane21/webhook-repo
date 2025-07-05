@@ -5,10 +5,19 @@ from app.models import WebhookEvent
 
 webhook = Blueprint("webhook", __name__, url_prefix='/webhook')
 
-@webhook.route('/receiver', methods=["POST"])
+# # # For testing of POST request
+# @webhook.route('/receiver', methods=["GET","POST"])
+# def receiver():
+#     # event_type = request.headers.get('X-GitHub-Event')
+#     payload = request.get_json(force=True)
+#     print("REceived JSON: ",payload)
+#     return {"status":"success"}, 200
+
+
+@webhook.route('/receiver', methods=["GET","POST"])
 def receiver():
     event_type = request.headers.get('X-GitHub-Event')
-    payload = request.json
+    payload = request.get_json(force=True)
 
     if not event_type or not payload:
         return jsonify({"error": "Missing data"}), 400
@@ -46,6 +55,22 @@ def receiver():
     db.session.commit()
 
     return jsonify({"status": "success"}), 200
+
+@webhook.route('/events', methods=["GET"])
+def events():
+    all_events = WebhookEvent.query.order_by(WebhookEvent.id.desc()).all()
+    result = []
+    for ev in all_events:
+        result.append({
+            "id": ev.id,
+            "request_id": ev.request_id,
+            "author": ev.author,
+            "action": ev.action,
+            "from_branch": ev.from_branch,
+            "to_branch": ev.to_branch,
+            "timestamp": ev.timestamp
+        })
+    return jsonify(result)
 
 @webhook.route('/viewer', methods=["GET"])
 def viewer():
